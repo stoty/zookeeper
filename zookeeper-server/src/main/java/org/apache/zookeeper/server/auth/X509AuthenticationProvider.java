@@ -18,6 +18,7 @@
 
 package org.apache.zookeeper.server.auth;
 
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -86,7 +87,7 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
             String keyStoreTypeProp = config.getProperty(x509Util.getSslKeystoreTypeProperty());
 
             boolean crlEnabled = config.getBoolean(x509Util.getSslCrlEnabledProperty(), Boolean.getBoolean("com.sun.net.ssl.checkRevocation"));
-            boolean ocspEnabled = config.getBoolean(x509Util.getSslOcspEnabledProperty(), Boolean.getBoolean("ocsp.enable"));
+            boolean ocspEnabled = config.getBoolean(x509Util.getSslOcspEnabledProperty(), Boolean.parseBoolean(Security.getProperty("ocsp.enable")));
             boolean hostnameVerificationEnabled = Boolean.parseBoolean(config.getProperty(x509Util.getSslHostnameVerificationEnabledProperty()));
 
             X509KeyManager km = null;

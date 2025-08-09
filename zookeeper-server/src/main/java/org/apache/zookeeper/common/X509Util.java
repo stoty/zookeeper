@@ -30,6 +30,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.cert.CertPathValidator;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXRevocationChecker;
@@ -396,7 +397,7 @@ public abstract class X509Util implements Closeable, AutoCloseable {
         String trustStoreTypeProp = config.getProperty(sslTruststoreTypeProperty);
 
         boolean sslCrlEnabled = config.getBoolean(this.sslCrlEnabledProperty, Boolean.getBoolean("com.sun.net.ssl.checkRevocation"));
-        boolean sslOcspEnabled = config.getBoolean(this.sslOcspEnabledProperty, Boolean.getBoolean("ocsp.enable"));
+        boolean sslOcspEnabled = config.getBoolean(this.sslOcspEnabledProperty, Boolean.parseBoolean(Security.getProperty("ocsp.enable")));
 
         boolean sslServerHostnameVerificationEnabled = isServerHostnameVerificationEnabled(config);
         boolean sslClientHostnameVerificationEnabled = isClientHostnameVerificationEnabled(config);

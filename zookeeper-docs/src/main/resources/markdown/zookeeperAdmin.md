@@ -1774,7 +1774,7 @@ and [SASL authentication for ZooKeeper](https://cwiki.apache.org/confluence/disp
     (Java system properties: **zookeeper.ssl.ocsp** and **zookeeper.ssl.quorum.ocsp**)
     **New in 3.5.5:**
     Specifies whether Online Certificate Status Protocol is enabled in client and quorum TLS protocols.
-    Default: jvm property "ocsp.enable" since 3.10.0, false otherwise
+    Default: jvm security property "ocsp.enable" since 3.10.0, false otherwise
 
 * *ssl.clientAuth* and *ssl.quorum.clientAuth* :
     (Java system properties: **zookeeper.ssl.clientAuth** and **zookeeper.ssl.quorum.clientAuth**)
