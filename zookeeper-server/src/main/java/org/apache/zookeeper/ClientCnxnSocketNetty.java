@@ -54,7 +54,6 @@ import org.apache.zookeeper.client.ZKClientConfig;
 import org.apache.zookeeper.common.ClientX509Util;
 import org.apache.zookeeper.common.NettyUtils;
 import org.apache.zookeeper.common.X509Exception;
-import org.apache.zookeeper.common.X509Exception.SSLContextException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -444,7 +443,7 @@ public class ClientCnxnSocketNetty extends ClientCnxnSocket {
         // The synchronized is to prevent the race on shared variable "sslContext".
         // Basically we only need to create it once.
         private synchronized void initSSL(ChannelPipeline pipeline)
-            throws X509Exception.KeyManagerException, X509Exception.TrustManagerException, SSLException, SSLContextException {
+            throws X509Exception.KeyManagerException, X509Exception.TrustManagerException, SSLException {
             if (sslContext == null) {
                 try (ClientX509Util x509Util = new ClientX509Util()) {
                     sslContext = x509Util.createNettySslContextForClient(clientConfig);
