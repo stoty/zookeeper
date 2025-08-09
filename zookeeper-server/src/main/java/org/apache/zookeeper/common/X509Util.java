@@ -30,12 +30,15 @@ import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.security.cert.CertPathValidator;
 import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.X509CertSelector;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javax.net.ssl.CertPathTrustManagerParameters;
@@ -392,8 +395,9 @@ public abstract class X509Util implements Closeable, AutoCloseable {
         String trustStorePasswordProp = getPasswordFromConfigPropertyOrFile(config, sslTruststorePasswdProperty, sslTruststorePasswdPathProperty);
         String trustStoreTypeProp = config.getProperty(sslTruststoreTypeProperty);
 
-        boolean sslCrlEnabled = config.getBoolean(this.sslCrlEnabledProperty);
-        boolean sslOcspEnabled = config.getBoolean(this.sslOcspEnabledProperty);
+        boolean sslCrlEnabled = config.getBoolean(this.sslCrlEnabledProperty, Boolean.getBoolean("com.sun.net.ssl.checkRevocation"));
+        boolean sslOcspEnabled = config.getBoolean(this.sslOcspEnabledProperty, Boolean.getBoolean("ocsp.enable"));
+
         boolean sslServerHostnameVerificationEnabled = isServerHostnameVerificationEnabled(config);
         boolean sslClientHostnameVerificationEnabled = isClientHostnameVerificationEnabled(config);
         boolean fipsMode = getFipsMode(config);
@@ -549,12 +553,17 @@ public abstract class X509Util implements Closeable, AutoCloseable {
             KeyStore ts = loadTrustStore(trustStoreLocation, trustStorePassword, trustStoreTypeProp);
             PKIXBuilderParameters pbParams = new PKIXBuilderParameters(ts, new X509CertSelector());
             if (crlEnabled || ocspEnabled) {
-                pbParams.setRevocationEnabled(true);
-                System.setProperty("com.sun.net.ssl.checkRevocation", "true");
-                System.setProperty("com.sun.security.enableCRLDP", "true");
-                if (ocspEnabled) {
-                    Security.setProperty("ocsp.enable", "true");
+                Set<PKIXRevocationChecker.Option> options = new HashSet<>();
+                if (!ocspEnabled) {
+                    options.add(PKIXRevocationChecker.Option.NO_FALLBACK);
+                    options.add(PKIXRevocationChecker.Option.PREFER_CRLS);
                 }
+                if (Boolean.getBoolean("com.sun.security.onlyCheckRevocationOfEECert"))  {
+                    options.add(PKIXRevocationChecker.Option.ONLY_END_ENTITY);
+                }
+                PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator.getInstance("PKIX").getRevocationChecker();
+                revocationChecker.setOptions(options);
+                pbParams.addCertPathChecker(revocationChecker);
             } else {
                 pbParams.setRevocationEnabled(false);
             }
