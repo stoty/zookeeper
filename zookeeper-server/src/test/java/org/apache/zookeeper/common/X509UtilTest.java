@@ -89,10 +89,6 @@ public class X509UtilTest extends BaseX509ParameterizedTestCase {
         System.clearProperty(x509Util.getCipherSuitesProperty());
         System.clearProperty(x509Util.getSslProtocolProperty());
         System.clearProperty(x509Util.getSslHandshakeDetectionTimeoutMillisProperty());
-        System.clearProperty("com.sun.net.ssl.checkRevocation");
-        System.clearProperty("com.sun.security.enableCRLDP");
-        Security.setProperty("ocsp.enable", Boolean.FALSE.toString());
-        Security.setProperty("com.sun.security.enableCRLDP", Boolean.FALSE.toString());
         System.clearProperty(ServerCnxnFactory.ZOOKEEPER_SERVER_CNXN_FACTORY);
         System.clearProperty(ZKClientConfig.ZOOKEEPER_CLIENT_CNXN_SOCKET);
         x509Util.close();
