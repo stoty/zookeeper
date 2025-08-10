@@ -554,12 +554,16 @@ public abstract class X509Util implements Closeable, AutoCloseable {
             KeyStore ts = loadTrustStore(trustStoreLocation, trustStorePassword, trustStoreTypeProp);
             PKIXBuilderParameters pbParams = new PKIXBuilderParameters(ts, new X509CertSelector());
             if (crlEnabled || ocspEnabled) {
+                // See [RevocationChecker][1] for details. Basically, we are mimicking legacy path as
+                // that is the path we are routing before(i.e. no explicit `PKIXRevocationChecker`).
+                //
+                // [1]: https://github.com/openjdk/jdk/blob/jdk-11%2B28/src/java.base/share/classes/sun/security/provider/certpath/RevocationChecker.java#L98
                 Set<PKIXRevocationChecker.Option> options = new HashSet<>();
                 if (!ocspEnabled) {
                     options.add(PKIXRevocationChecker.Option.NO_FALLBACK);
                     options.add(PKIXRevocationChecker.Option.PREFER_CRLS);
                 }
-                if (Boolean.getBoolean("com.sun.security.onlyCheckRevocationOfEECert"))  {
+                if (Boolean.parseBoolean(Security.getProperty("com.sun.security.onlyCheckRevocationOfEECert")))  {
                     options.add(PKIXRevocationChecker.Option.ONLY_END_ENTITY);
                 }
                 PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator.getInstance("PKIX").getRevocationChecker();
